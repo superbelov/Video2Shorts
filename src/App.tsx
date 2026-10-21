@@ -1,376 +1,335 @@
 import { useState } from 'react';
 
-const files = [
-  { name: 'main.py', desc: 'Главный скрипт — запускает весь процесс' },
-  { name: 'transcriber.py', desc: 'Модуль транскрибации (faster-whisper)' },
-  { name: 'highlight_finder.py', desc: 'Поиск хайлайтов через LLM' },
-  { name: 'face_tracker.py', desc: 'Трекинг лица (YOLOv8 + Калман)' },
-  { name: 'video_renderer.py', desc: 'Рендеринг вертикальных клипов (FFmpeg)' },
-  { name: 'config.yaml', desc: 'Настройки — что и как обрабатывать' },
-  { name: 'requirements.txt', desc: 'Список Python-библиотек' },
-  { name: 'install.sh', desc: 'Установка для Linux/Mac' },
-  { name: 'install.bat', desc: 'Установка для Windows' },
-  { name: 'test_transcriber.py', desc: 'Тест транскрибации' },
-  { name: 'test_tracker.py', desc: 'Тест трекинга' },
-  { name: 'README.md', desc: 'Документация' },
+// Все файлы проекта с прямыми ссылками для скачивания
+const projectFiles = [
+  {
+    name: 'main.py',
+    url: '/python-project/main.py',
+    desc: 'Главный скрипт — запускает весь процесс конвертации',
+    required: true,
+  },
+  {
+    name: 'transcriber.py',
+    url: '/python-project/transcriber.py',
+    desc: 'Транскрибация аудио через faster-whisper',
+    required: true,
+  },
+  {
+    name: 'highlight_finder.py',
+    url: '/python-project/highlight_finder.py',
+    desc: 'Поиск вирусных фрагментов через локальную LLM',
+    required: true,
+  },
+  {
+    name: 'face_tracker.py',
+    url: '/python-project/face_tracker.py',
+    desc: 'Трекинг лица через YOLOv8 + фильтр Калмана',
+    required: true,
+  },
+  {
+    name: 'video_renderer.py',
+    url: '/python-project/video_renderer.py',
+    desc: 'Рендеринг вертикальных клипов через FFmpeg',
+    required: true,
+  },
+  {
+    name: 'config.yaml',
+    url: '/python-project/config.yaml',
+    desc: 'Настройки — размер модели, количество клипов и т.д.',
+    required: true,
+  },
+  {
+    name: 'requirements.txt',
+    url: '/python-project/requirements.txt',
+    desc: 'Список Python-библиотек для установки',
+    required: true,
+  },
+  {
+    name: 'install.sh',
+    url: '/python-project/install.sh',
+    desc: 'Скрипт установки для Linux и macOS',
+    required: false,
+    platform: 'Mac/Linux',
+  },
+  {
+    name: 'install.bat',
+    url: '/python-project/install.bat',
+    desc: 'Скрипт установки для Windows',
+    required: false,
+    platform: 'Windows',
+  },
+  {
+    name: 'test_transcriber.py',
+    url: '/python-project/test_transcriber.py',
+    desc: 'Тестовый скрипт для проверки транскрибации',
+    required: false,
+  },
+  {
+    name: 'test_tracker.py',
+    url: '/python-project/test_tracker.py',
+    desc: 'Тестовый скрипт для проверки трекинга',
+    required: false,
+  },
+  {
+    name: 'README.md',
+    url: '/python-project/README.md',
+    desc: 'Документация проекта',
+    required: false,
+  },
 ];
 
 export default function App() {
-  const [copied, setCopied] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
 
-  const copy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
+  const handleDownload = (file: { name: string; url: string }) => {
+    setDownloading(file.name);
+    // Создаём ссылку и кликаем по ней
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.download = file.name;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => setDownloading(null), 1500);
   };
 
-  const Cmd = ({ id, text, comment }: { id: string; text: string; comment?: string }) => (
-    <div className="bg-gray-950 rounded-lg p-3 font-mono text-sm group relative">
-      {comment && <div className="text-gray-500 text-xs mb-1">{comment}</div>}
-      <div className="flex items-center gap-2">
-        <span className="text-green-400 select-none">$</span>
-        <span className="text-gray-200 break-all flex-1">{text}</span>
-        <button
-          onClick={() => copy(text, id)}
-          className="px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-400 shrink-0"
-        >
-          {copied === id ? '✓' : '📋'}
-        </button>
-      </div>
-    </div>
-  );
+  const downloadAll = () => {
+    // Скачиваем все файлы по очереди с небольшой задержкой
+    projectFiles.forEach((file, i) => {
+      setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.download = file.name;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, i * 300);
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-gray-900/50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center font-bold">
-              V
+      <div className="border-b border-gray-800 bg-gray-900/50 sticky top-0 z-10 backdrop-blur-xl">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center font-bold text-lg">
+                V
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">Video2Shorts</h1>
+                <p className="text-xs text-gray-400">Файлы проекта для скачивания</p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-bold text-lg">Video2Shorts</h1>
-              <p className="text-xs text-gray-400">Инструкция для локального использования</p>
-            </div>
+            <button
+              onClick={downloadAll}
+              className="px-4 py-2 bg-gradient-to-r from-violet-600 to-pink-600 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+            >
+              ⬇️ Скачать всё ({projectFiles.length} файлов)
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
-        {/* Главная инструкция */}
+        {/* Инструкция */}
         <div className="bg-gradient-to-br from-violet-900/20 to-pink-900/20 border border-violet-500/30 rounded-2xl p-6">
-          <h2 className="text-2xl font-bold mb-3">📌 Что это за файлы?</h2>
+          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+            📍 Где находятся файлы?
+          </h2>
           <p className="text-gray-300 leading-relaxed mb-4">
-            Это обычный <strong>Python-проект</strong>. Файлы ниже — это код, который вы запускаете
-            у себя на ноутбуке через командную строку (терминал). Никакого сайта для работы не нужно.
+            Все файлы проекта <strong>уже созданы и лежат на этом сайте</strong>. 
+            Просто нажмите кнопку <strong>"Скачать"</strong> рядом с каждым файлом — 
+            он сохранится в вашу папку <strong>"Загрузки"</strong>.
           </p>
-          <div className="bg-gray-950 rounded-lg p-4 text-sm">
-            <div className="text-gray-400 mb-2">Как это работает:</div>
+          <div className="bg-gray-950 rounded-lg p-4 text-sm space-y-2">
+            <div className="text-gray-400">📂 Что делать дальше:</div>
             <ol className="space-y-1 text-gray-300 list-decimal list-inside">
-              <li>Скачиваете все файлы в одну папку на ноутбуке</li>
-              <li>Устанавливаете Python и FFmpeg (один раз)</li>
-              <li>Запускаете скрипт командой в терминале</li>
-              <li>Получаете готовые вертикальные клипы</li>
+              <li>Нажмите <strong>"Скачать всё"</strong> выше — скачаются все 12 файлов</li>
+              <li>Создайте папку <code className="text-violet-300">video2shorts</code> на Рабочем столе</li>
+              <li>Переместите все скачанные файлы в эту папку</li>
+              <li>Откройте терминал в этой папке и запустите <code className="text-green-400">install.bat</code> (Windows) или <code className="text-green-400">./install.sh</code> (Mac/Linux)</li>
+              <li>Запустите: <code className="text-green-400">python main.py --input ваше_видео.mp4</code></li>
             </ol>
           </div>
         </div>
 
-        {/* Шаг 1: Скачать файлы */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-sm">1</span>
-            Скачайте все файлы в одну папку
-          </h2>
-          <p className="text-gray-400 text-sm mb-4">
-            Нажмите на каждый файл ниже — он скачается. Положите все файлы в одну папку, например <code className="text-violet-300">video2shorts</code> на Рабочем столе.
-          </p>
+        {/* Список файлов */}
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+          <div className="bg-gray-800/50 border-b border-gray-800 px-6 py-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              📦 Все файлы проекта
+              <span className="text-sm font-normal text-gray-400">({projectFiles.length} шт.)</span>
+            </h2>
+            <p className="text-sm text-gray-400 mt-1">
+              Нажмите на файл, чтобы скачать. Или используйте кнопку "Скачать всё" выше.
+            </p>
+          </div>
 
-          <div className="grid sm:grid-cols-2 gap-2">
-            {files.map((file) => (
-              <a
+          <div className="divide-y divide-gray-800">
+            {projectFiles.map((file) => (
+              <div
                 key={file.name}
-                href={`/python-project/${file.name}`}
-                download
-                className="flex items-center gap-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-violet-500/50 rounded-lg p-3 transition-all group"
+                className="flex items-center gap-4 px-6 py-4 hover:bg-gray-800/30 transition-colors"
               >
-                <span className="text-xl">📄</span>
+                {/* Иконка */}
+                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-lg shrink-0">
+                  {file.name.endsWith('.py') ? '🐍' :
+                   file.name.endsWith('.yaml') ? '⚙️' :
+                   file.name.endsWith('.txt') ? '📋' :
+                   file.name.endsWith('.sh') || file.name.endsWith('.bat') ? '⚡' :
+                   '📄'}
+                </div>
+
+                {/* Информация */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-200 truncate">{file.name}</div>
-                  <div className="text-xs text-gray-500 truncate">{file.desc}</div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-sm font-medium text-gray-200">
+                      {file.name}
+                    </span>
+                    {file.required && (
+                      <span className="text-xs bg-green-900/30 text-green-400 px-2 py-0.5 rounded border border-green-500/30">
+                        обязательно
+                      </span>
+                    )}
+                    {file.platform && (
+                      <span className="text-xs bg-blue-900/30 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30">
+                        {file.platform}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">{file.desc}</div>
                 </div>
-                <span className="text-gray-600 group-hover:text-violet-400">⬇️</span>
-              </a>
-            ))}
-          </div>
 
-          <div className="mt-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-200">
-            💡 <strong>Совет:</strong> Создайте папку <code>video2shorts</code> на Рабочем столе и скачайте все файлы туда.
-          </div>
-        </div>
-
-        {/* Шаг 2: Установить Python */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-sm">2</span>
-            Установите Python и FFmpeg
-          </h2>
-
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm font-semibold text-gray-300 mb-2">🐍 Python (обязательно):</div>
-              <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
-                <li>Скачайте с <a href="https://python.org/downloads" target="_blank" className="text-violet-400 underline">python.org/downloads</a></li>
-                <li>Версия <strong>3.10 или новее</strong></li>
-                <li className="text-yellow-300">⚠️ При установке отметьте галочку <strong>"Add Python to PATH"</strong></li>
-              </ul>
-            </div>
-
-            <div>
-              <div className="text-sm font-semibold text-gray-300 mb-2">🎬 FFmpeg (обязательно):</div>
-              <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
-                <li><strong>Windows:</strong> скачайте с <a href="https://www.gyan.dev/ffmpeg/builds/" target="_blank" className="text-violet-400 underline">gyan.dev</a>, распакуйте, добавьте папку <code>bin</code> в PATH</li>
-                <li><strong>Mac:</strong> <code className="text-green-400">brew install ffmpeg</code></li>
-                <li><strong>Linux:</strong> <code className="text-green-400">sudo apt install ffmpeg</code></li>
-              </ul>
-            </div>
-
-            <div className="bg-gray-950 rounded-lg p-3">
-              <div className="text-xs text-gray-500 mb-1">Проверьте установку:</div>
-              <Cmd id="check-python" text="python --version" />
-              <div className="mt-2">
-                <Cmd id="check-ffmpeg" text="ffmpeg -version" />
+                {/* Кнопка скачивания */}
+                <button
+                  onClick={() => handleDownload(file)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0 ${
+                    downloading === file.name
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-800 hover:bg-violet-600 text-gray-300 hover:text-white'
+                  }`}
+                >
+                  {downloading === file.name ? '✓ Скачан' : '⬇️ Скачать'}
+                </button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Шаг 3: Открыть терминал */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-sm">3</span>
-            Откройте терминал в папке с файлами
-          </h2>
-
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm font-semibold text-gray-300 mb-2">🪟 Windows:</div>
-              <ol className="text-sm text-gray-400 space-y-1 list-decimal list-inside">
-                <li>Откройте папку <code>video2shorts</code> на Рабочем столе</li>
-                <li>В адресной строке проводника напишите <code className="text-green-400">cmd</code> и нажмите Enter</li>
-                <li>Или: правой кнопкой в папке → "Открыть в терминале"</li>
-              </ol>
-            </div>
-
-            <div>
-              <div className="text-sm font-semibold text-gray-300 mb-2">🍎 Mac:</div>
-              <ol className="text-sm text-gray-400 space-y-1 list-decimal list-inside">
-                <li>Откройте приложение "Терминал"</li>
-                <li>Напишите <code className="text-green-400">cd </code> (с пробелом после cd)</li>
-                <li>Перетащите папку <code>video2shorts</code> в Терминал, нажмите Enter</li>
-              </ol>
-            </div>
-
-            <div>
-              <div className="text-sm font-semibold text-gray-300 mb-2">🐧 Linux:</div>
-              <div className="text-sm text-gray-400">
-                Правой кнопкой в папке → "Открыть в терминале"
-              </div>
-            </div>
-
-            <div className="bg-gray-950 rounded-lg p-3">
-              <div className="text-xs text-gray-500 mb-1">Вы должны увидеть что-то вроде:</div>
-              <div className="text-green-400 font-mono text-sm">
-                C:\Users\ВашеИмя\Desktop\video2shorts&gt;
-              </div>
-              <div className="text-xs text-gray-500 mt-2">
-                или на Mac/Linux: <code className="text-green-400">~/Desktop/video2shorts$</code>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Шаг 4: Установка зависимостей */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-sm">4</span>
-            Установите зависимости (один раз)
-          </h2>
-
-          <div className="space-y-3">
-            <div className="text-sm text-gray-400">
-              В терминале, находясь в папке с файлами, выполните:
-            </div>
-
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-200">
-              🪟 <strong>Windows:</strong>
-            </div>
-            <Cmd id="win-install" text="install.bat" />
-
-            <div className="bg-gray-800/30 border border-gray-700/30 rounded-lg p-3 text-sm text-gray-300 mt-3">
-              🍎 <strong>Mac / 🐧 Linux:</strong>
-            </div>
-            <Cmd id="mac-install-1" text="chmod +x install.sh" />
-            <Cmd id="mac-install-2" text="./install.sh" />
-
-            <div className="text-sm text-gray-400 mt-3">
-              Что делает скрипт:
-              <ul className="mt-2 space-y-1 list-disc list-inside text-gray-500">
-                <li>Создаёт виртуальное окружение <code>venv/</code></li>
-                <li>Устанавливает все нужные библиотеки</li>
-                <li>Скачивает модели Whisper и YOLOv8</li>
-              </ul>
-            </div>
-
-            <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-200">
-              ⏱️ Установка занимает 5-15 минут в зависимости от интернета.
-            </div>
-          </div>
-        </div>
-
-        {/* Шаг 5: Запуск */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-sm">5</span>
-            Запустите обработку видео!
-          </h2>
-
-          <div className="space-y-4">
-            <div className="text-sm text-gray-400">
-              Положите ваше видео в папку <code>video2shorts</code> (рядом с Python-файлами).
-            </div>
-
-            <div className="bg-gray-950 rounded-lg p-4 space-y-3">
-              <div className="text-xs text-gray-500">Сначала активируйте окружение:</div>
-
-              <div className="bg-gray-800/30 rounded p-2 text-xs text-gray-400">🪟 Windows:</div>
-              <Cmd id="win-activate" text="venv\Scripts\activate" />
-
-              <div className="bg-gray-800/30 rounded p-2 text-xs text-gray-400 mt-3">🍎 Mac / 🐧 Linux:</div>
-              <Cmd id="mac-activate" text="source venv/bin/activate" />
-            </div>
-
-            <div className="bg-gray-950 rounded-lg p-4 space-y-3">
-              <div className="text-xs text-gray-500">Теперь запустите скрипт:</div>
-
-              <div className="text-xs text-green-400 mb-1"># Тестовый запуск (быстро, без рендеринга):</div>
-              <Cmd id="run-dry" text="python main.py --input video.mp4 --dry-run" />
-
-              <div className="text-xs text-green-400 mb-1 mt-3"># Полная обработка:</div>
-              <Cmd id="run-full" text="python main.py --input video.mp4 --output ./clips/" />
-
-              <div className="text-xs text-green-400 mb-1 mt-3"># Обработать все видео в папке:</div>
-              <Cmd id="run-folder" text="python main.py --input ./videos/ --output ./clips/" />
-            </div>
-
-            <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 text-sm text-green-200">
-              ✅ Готово! Через несколько минут в папке <code>clips/</code> появятся вертикальные клипы.
-            </div>
-          </div>
-        </div>
-
-        {/* Где результат */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-sm">6</span>
-            Где найти результат?
-          </h2>
-
-          <div className="text-sm text-gray-400 mb-4">
-            После обработки откройте папку <code className="text-violet-300">clips/</code> — там будут готовые вертикальные видео.
-          </div>
-
-          <div className="bg-gray-950 rounded-lg p-4 font-mono text-xs text-gray-300">
-{`clips/
-├── report.json              ← отчёт
-└── video/                   ← папка для вашего видео
-    ├── video.srt            ← субтитры
-    ├── clip_01_120s-165s.mp4  ← готовый клип #1
-    ├── clip_02_340s-395s.mp4  ← готовый клип #2
-    └── clip_03_580s-630s.mp4  ← готовый клип #3`}
-          </div>
-
-          <div className="mt-4 text-sm text-gray-400">
-            Клипы можно сразу загружать в TikTok, Instagram Reels или VK Клипы — они уже в формате 9:16 (1080×1920).
-          </div>
-        </div>
-
-        {/* Частые проблемы */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4">🔧 Если что-то не работает</h2>
-
-          <div className="space-y-3">
-            {[
-              {
-                q: '"python" не является командой',
-                a: 'Python не установлен или не добавлен в PATH. Переустановите Python с python.org, отметив "Add to PATH".'
-              },
-              {
-                q: '"ffmpeg" не найден',
-                a: 'FFmpeg не установлен. Скачайте с gyan.dev (Windows) или установите через brew (Mac).'
-              },
-              {
-                q: 'Ошибка при установке библиотек',
-                a: 'Убедитесь, что активировали venv. Проверьте версию Python: python --version (нужна 3.10+).'
-              },
-              {
-                q: 'Медленно работает',
-                a: 'Это нормально на CPU. С NVIDIA GPU будет в 5-10 раз быстрее. В config.yaml можно поставить model: "small" для ускорения.'
-              },
-              {
-                q: 'Нет Ollama — как искать хайлайты?',
-                a: 'Без Ollama работает fallback-алгоритм (по эвристикам). Для AI-поиска установите Ollama с ollama.com и выполните: ollama pull qwen2.5:14b'
-              },
-            ].map((item, i) => (
-              <details key={i} className="bg-gray-800/50 rounded-lg overflow-hidden group">
-                <summary className="p-3 cursor-pointer text-sm font-medium text-gray-200 hover:bg-gray-800 transition-colors">
-                  ❌ {item.q}
-                </summary>
-                <div className="p-3 pt-0 text-sm text-gray-400">
-                  → {item.a}
-                </div>
-              </details>
             ))}
           </div>
         </div>
 
-        {/* Краткая шпаргалка */}
-        <div className="bg-gradient-to-br from-violet-900/30 to-pink-900/30 border border-violet-500/20 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4">⚡ Краткая шпаргалка</h2>
+        {/* Обязательные vs опциональные */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <span className="text-green-400">✅</span> Обязательно скачать (7 файлов)
+            </h3>
+            <ul className="space-y-1 text-sm text-gray-400 font-mono">
+              <li>• main.py</li>
+              <li>• transcriber.py</li>
+              <li>• highlight_finder.py</li>
+              <li>• face_tracker.py</li>
+              <li>• video_renderer.py</li>
+              <li>• config.yaml</li>
+              <li>• requirements.txt</li>
+            </ul>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <span className="text-blue-400">🔧</span> Опционально (5 файлов)
+            </h3>
+            <ul className="space-y-1 text-sm text-gray-400 font-mono">
+              <li>• install.sh <span className="text-gray-600">(Mac/Linux)</span></li>
+              <li>• install.bat <span className="text-gray-600">(Windows)</span></li>
+              <li>• test_transcriber.py</li>
+              <li>• test_tracker.py</li>
+              <li>• README.md</li>
+            </ul>
+          </div>
+        </div>
 
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center justify-between bg-gray-950/50 rounded-lg p-3">
-              <span className="text-gray-400">Активировать окружение (Windows):</span>
-              <code className="text-green-400 text-xs">venv\Scripts\activate</code>
+        {/* Куда скачаются */}
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            📂 Куда скачаются файлы?
+          </h2>
+          <div className="space-y-3 text-sm text-gray-400">
+            <p>
+              По умолчанию браузер сохраняет файлы в папку <strong className="text-gray-200">"Загрузки"</strong> (Downloads).
+            </p>
+            <div className="bg-gray-950 rounded-lg p-4 font-mono text-xs space-y-2">
+              <div>
+                <span className="text-gray-500">🪟 Windows:</span>{' '}
+                <span className="text-gray-300">C:\Users\ВашеИмя\Downloads\</span>
+              </div>
+              <div>
+                <span className="text-gray-500">🍎 Mac:</span>{' '}
+                <span className="text-gray-300">/Users/ВашеИмя/Downloads/</span>
+              </div>
+              <div>
+                <span className="text-gray-500">🐧 Linux:</span>{' '}
+                <span className="text-gray-300">/home/ВашеИмя/Downloads/</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between bg-gray-950/50 rounded-lg p-3">
-              <span className="text-gray-400">Активировать окружение (Mac/Linux):</span>
-              <code className="text-green-400 text-xs">source venv/bin/activate</code>
+            <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 text-yellow-200">
+              💡 <strong>Совет:</strong> После скачивания создайте папку <code>video2shorts</code> на Рабочем столе и переместите туда все файлы.
             </div>
-            <div className="flex items-center justify-between bg-gray-950/50 rounded-lg p-3">
-              <span className="text-gray-400">Тест без рендеринга:</span>
-              <code className="text-green-400 text-xs">python main.py -i video.mp4 --dry-run</code>
+          </div>
+        </div>
+
+        {/* Быстрый старт */}
+        <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border border-green-500/20 rounded-2xl p-6">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            🚀 Что делать после скачивания
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">1</div>
+              <div className="text-sm text-gray-300">
+                Скачайте все файлы и положите в одну папку
+              </div>
             </div>
-            <div className="flex items-center justify-between bg-gray-950/50 rounded-lg p-3">
-              <span className="text-gray-400">Полная обработка:</span>
-              <code className="text-green-400 text-xs">python main.py -i video.mp4 -o ./clips/</code>
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">2</div>
+              <div className="text-sm text-gray-300">
+                Установите Python с <a href="https://python.org" target="_blank" className="text-violet-400 underline">python.org</a> (отметьте "Add to PATH") и FFmpeg
+              </div>
             </div>
-            <div className="flex items-center justify-between bg-gray-950/50 rounded-lg p-3">
-              <span className="text-gray-400">Возобновить после прерывания:</span>
-              <code className="text-green-400 text-xs">python main.py -i ./videos/ --resume</code>
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">3</div>
+              <div className="text-sm text-gray-300">
+                Откройте терминал в папке с файлами и запустите установку:
+                <div className="mt-2 bg-gray-950 rounded p-2 font-mono text-xs">
+                  <div className="text-green-400">install.bat</div>
+                  <div className="text-gray-500 mt-1"># или для Mac/Linux: chmod +x install.sh && ./install.sh</div>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-between bg-gray-950/50 rounded-lg p-3">
-              <span className="text-gray-400">Подробные логи:</span>
-              <code className="text-green-400 text-xs">python main.py -i video.mp4 --log-level DEBUG</code>
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">4</div>
+              <div className="text-sm text-gray-300">
+                Запустите обработку видео:
+                <div className="mt-2 bg-gray-950 rounded p-2 font-mono text-xs">
+                  <div className="text-green-400">python main.py --input ваше_видео.mp4 --output ./clips/</div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">5</div>
+              <div className="text-sm text-gray-300">
+                Готово! Вертикальные клипы появятся в папке <code className="text-violet-300">clips/</code> 🎉
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500 py-8 border-t border-gray-800">
-          <p>Video2Shorts — все файлы Python-проекта выше</p>
-          <p className="mt-1">Скачайте → установите → запустите. Готово!</p>
+        <div className="text-center text-sm text-gray-500 py-6 border-t border-gray-800">
+          <p>Все 12 файлов проекта доступны для скачивания выше</p>
+          <p className="mt-1">Нажмите "Скачать всё" — и они попадут в вашу папку "Загрузки"</p>
         </div>
       </div>
     </div>
