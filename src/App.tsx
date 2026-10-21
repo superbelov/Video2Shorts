@@ -1,335 +1,150 @@
 import { useState } from 'react';
 
-// Все файлы проекта с прямыми ссылками для скачивания
-const projectFiles = [
-  {
-    name: 'main.py',
-    url: '/python-project/main.py',
-    desc: 'Главный скрипт — запускает весь процесс конвертации',
-    required: true,
-  },
-  {
-    name: 'transcriber.py',
-    url: '/python-project/transcriber.py',
-    desc: 'Транскрибация аудио через faster-whisper',
-    required: true,
-  },
-  {
-    name: 'highlight_finder.py',
-    url: '/python-project/highlight_finder.py',
-    desc: 'Поиск вирусных фрагментов через локальную LLM',
-    required: true,
-  },
-  {
-    name: 'face_tracker.py',
-    url: '/python-project/face_tracker.py',
-    desc: 'Трекинг лица через YOLOv8 + фильтр Калмана',
-    required: true,
-  },
-  {
-    name: 'video_renderer.py',
-    url: '/python-project/video_renderer.py',
-    desc: 'Рендеринг вертикальных клипов через FFmpeg',
-    required: true,
-  },
-  {
-    name: 'config.yaml',
-    url: '/python-project/config.yaml',
-    desc: 'Настройки — размер модели, количество клипов и т.д.',
-    required: true,
-  },
-  {
-    name: 'requirements.txt',
-    url: '/python-project/requirements.txt',
-    desc: 'Список Python-библиотек для установки',
-    required: true,
-  },
-  {
-    name: 'install.sh',
-    url: '/python-project/install.sh',
-    desc: 'Скрипт установки для Linux и macOS',
-    required: false,
-    platform: 'Mac/Linux',
-  },
-  {
-    name: 'install.bat',
-    url: '/python-project/install.bat',
-    desc: 'Скрипт установки для Windows',
-    required: false,
-    platform: 'Windows',
-  },
-  {
-    name: 'test_transcriber.py',
-    url: '/python-project/test_transcriber.py',
-    desc: 'Тестовый скрипт для проверки транскрибации',
-    required: false,
-  },
-  {
-    name: 'test_tracker.py',
-    url: '/python-project/test_tracker.py',
-    desc: 'Тестовый скрипт для проверки трекинга',
-    required: false,
-  },
-  {
-    name: 'README.md',
-    url: '/python-project/README.md',
-    desc: 'Документация проекта',
-    required: false,
-  },
+const files = [
+  { name: 'main.py', url: '/python-project/main.py', icon: '🐍', desc: 'Главный скрипт' },
+  { name: 'transcriber.py', url: '/python-project/transcriber.py', icon: '🐍', desc: 'Транскрибация' },
+  { name: 'highlight_finder.py', url: '/python-project/highlight_finder.py', icon: '🐍', desc: 'Поиск хайлайтов' },
+  { name: 'face_tracker.py', url: '/python-project/face_tracker.py', icon: '🐍', desc: 'Трекинг лица' },
+  { name: 'video_renderer.py', url: '/python-project/video_renderer.py', icon: '🐍', desc: 'Рендеринг видео' },
+  { name: 'config.yaml', url: '/python-project/config.yaml', icon: '⚙️', desc: 'Настройки' },
+  { name: 'requirements.txt', url: '/python-project/requirements.txt', icon: '📋', desc: 'Список библиотек' },
+  { name: 'install.bat', url: '/python-project/install.bat', icon: '⚡', desc: 'Установка Windows' },
+  { name: 'install.sh', url: '/python-project/install.sh', icon: '⚡', desc: 'Установка Mac/Linux' },
+  { name: 'test_transcriber.py', url: '/python-project/test_transcriber.py', icon: '🧪', desc: 'Тест транскрибации' },
+  { name: 'test_tracker.py', url: '/python-project/test_tracker.py', icon: '🧪', desc: 'Тест трекинга' },
+  { name: 'README.md', url: '/python-project/README.md', icon: '📖', desc: 'Документация' },
 ];
 
 export default function App() {
-  const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloaded, setDownloaded] = useState<string[]>([]);
 
-  const handleDownload = (file: { name: string; url: string }) => {
-    setDownloading(file.name);
-    // Создаём ссылку и кликаем по ней
+  const download = (name: string, url: string) => {
     const link = document.createElement('a');
-    link.href = file.url;
-    link.download = file.name;
-    link.target = '_blank';
+    link.href = url;
+    link.download = name;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setTimeout(() => setDownloading(null), 1500);
+    if (!downloaded.includes(name)) {
+      setDownloaded([...downloaded, name]);
+    }
   };
 
   const downloadAll = () => {
-    // Скачиваем все файлы по очереди с небольшой задержкой
-    projectFiles.forEach((file, i) => {
-      setTimeout(() => {
-        const link = document.createElement('a');
-        link.href = file.url;
-        link.download = file.name;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }, i * 300);
+    files.forEach((f, i) => {
+      setTimeout(() => download(f.name, f.url), i * 400);
     });
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <div className="border-b border-gray-800 bg-gray-900/50 sticky top-0 z-10 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center font-bold text-lg">
-                V
-              </div>
-              <div>
-                <h1 className="font-bold text-lg">Video2Shorts</h1>
-                <p className="text-xs text-gray-400">Файлы проекта для скачивания</p>
-              </div>
-            </div>
-            <button
-              onClick={downloadAll}
-              className="px-4 py-2 bg-gradient-to-r from-violet-600 to-pink-600 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
-            >
-              ⬇️ Скачать всё ({projectFiles.length} файлов)
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
+      <div className="max-w-2xl mx-auto px-4 py-8">
 
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-
-        {/* Инструкция */}
-        <div className="bg-gradient-to-br from-violet-900/20 to-pink-900/20 border border-violet-500/30 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
-            📍 Где находятся файлы?
-          </h2>
-          <p className="text-gray-300 leading-relaxed mb-4">
-            Все файлы проекта <strong>уже созданы и лежат на этом сайте</strong>. 
-            Просто нажмите кнопку <strong>"Скачать"</strong> рядом с каждым файлом — 
-            он сохранится в вашу папку <strong>"Загрузки"</strong>.
+        {/* Заголовок */}
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-4">📦</div>
+          <h1 className="text-3xl font-bold mb-3">
+            Файлы проекта Video2Shorts
+          </h1>
+          <p className="text-gray-400">
+            Нажмите на кнопку <strong className="text-white">"Скачать"</strong> — файл попадёт на ваш ноутбук
           </p>
-          <div className="bg-gray-950 rounded-lg p-4 text-sm space-y-2">
-            <div className="text-gray-400">📂 Что делать дальше:</div>
-            <ol className="space-y-1 text-gray-300 list-decimal list-inside">
-              <li>Нажмите <strong>"Скачать всё"</strong> выше — скачаются все 12 файлов</li>
-              <li>Создайте папку <code className="text-violet-300">video2shorts</code> на Рабочем столе</li>
-              <li>Переместите все скачанные файлы в эту папку</li>
-              <li>Откройте терминал в этой папке и запустите <code className="text-green-400">install.bat</code> (Windows) или <code className="text-green-400">./install.sh</code> (Mac/Linux)</li>
-              <li>Запустите: <code className="text-green-400">python main.py --input ваше_видео.mp4</code></li>
-            </ol>
-          </div>
+        </div>
+
+        {/* Большая кнопка "Скачать всё" */}
+        <button
+          onClick={downloadAll}
+          className="w-full mb-8 py-5 bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 rounded-2xl text-xl font-bold shadow-2xl shadow-violet-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          ⬇️ Скачать все 12 файлов сразу
+        </button>
+
+        {/* Или по одному */}
+        <div className="text-center text-sm text-gray-500 mb-4">
+          или скачайте по одному ↓
         </div>
 
         {/* Список файлов */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-          <div className="bg-gray-800/50 border-b border-gray-800 px-6 py-4">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              📦 Все файлы проекта
-              <span className="text-sm font-normal text-gray-400">({projectFiles.length} шт.)</span>
-            </h2>
-            <p className="text-sm text-gray-400 mt-1">
-              Нажмите на файл, чтобы скачать. Или используйте кнопку "Скачать всё" выше.
-            </p>
-          </div>
-
-          <div className="divide-y divide-gray-800">
-            {projectFiles.map((file) => (
-              <div
-                key={file.name}
-                className="flex items-center gap-4 px-6 py-4 hover:bg-gray-800/30 transition-colors"
+        <div className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden">
+          {files.map((file, i) => (
+            <div
+              key={file.name}
+              className={`flex items-center gap-3 p-4 ${
+                i !== files.length - 1 ? 'border-b border-gray-800' : ''
+              } hover:bg-gray-800/30 transition-colors`}
+            >
+              <div className="text-2xl w-10 text-center shrink-0">{file.icon}</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-mono text-sm font-medium text-gray-200 truncate">
+                  {file.name}
+                </div>
+                <div className="text-xs text-gray-500">{file.desc}</div>
+              </div>
+              <button
+                onClick={() => download(file.name, file.url)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0 ${
+                  downloaded.includes(file.name)
+                    ? 'bg-green-600/20 text-green-400 border border-green-500/30'
+                    : 'bg-gray-800 hover:bg-violet-600 text-gray-300 hover:text-white'
+                }`}
               >
-                {/* Иконка */}
-                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-lg shrink-0">
-                  {file.name.endsWith('.py') ? '🐍' :
-                   file.name.endsWith('.yaml') ? '⚙️' :
-                   file.name.endsWith('.txt') ? '📋' :
-                   file.name.endsWith('.sh') || file.name.endsWith('.bat') ? '⚡' :
-                   '📄'}
-                </div>
-
-                {/* Информация */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-sm font-medium text-gray-200">
-                      {file.name}
-                    </span>
-                    {file.required && (
-                      <span className="text-xs bg-green-900/30 text-green-400 px-2 py-0.5 rounded border border-green-500/30">
-                        обязательно
-                      </span>
-                    )}
-                    {file.platform && (
-                      <span className="text-xs bg-blue-900/30 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30">
-                        {file.platform}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-0.5">{file.desc}</div>
-                </div>
-
-                {/* Кнопка скачивания */}
-                <button
-                  onClick={() => handleDownload(file)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0 ${
-                    downloading === file.name
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-800 hover:bg-violet-600 text-gray-300 hover:text-white'
-                  }`}
-                >
-                  {downloading === file.name ? '✓ Скачан' : '⬇️ Скачать'}
-                </button>
-              </div>
-            ))}
-          </div>
+                {downloaded.includes(file.name) ? '✓ Скачан' : '⬇️ Скачать'}
+              </button>
+            </div>
+          ))}
         </div>
 
-        {/* Обязательные vs опциональные */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <span className="text-green-400">✅</span> Обязательно скачать (7 файлов)
-            </h3>
-            <ul className="space-y-1 text-sm text-gray-400 font-mono">
-              <li>• main.py</li>
-              <li>• transcriber.py</li>
-              <li>• highlight_finder.py</li>
-              <li>• face_tracker.py</li>
-              <li>• video_renderer.py</li>
-              <li>• config.yaml</li>
-              <li>• requirements.txt</li>
-            </ul>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <span className="text-blue-400">🔧</span> Опционально (5 файлов)
-            </h3>
-            <ul className="space-y-1 text-sm text-gray-400 font-mono">
-              <li>• install.sh <span className="text-gray-600">(Mac/Linux)</span></li>
-              <li>• install.bat <span className="text-gray-600">(Windows)</span></li>
-              <li>• test_transcriber.py</li>
-              <li>• test_tracker.py</li>
-              <li>• README.md</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Куда скачаются */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            📂 Куда скачаются файлы?
+        {/* Куда попадают файлы */}
+        <div className="mt-8 bg-blue-900/20 border border-blue-500/30 rounded-2xl p-5">
+          <h2 className="font-bold text-lg mb-3 flex items-center gap-2">
+            📂 Куда попадают файлы?
           </h2>
-          <div className="space-y-3 text-sm text-gray-400">
-            <p>
-              По умолчанию браузер сохраняет файлы в папку <strong className="text-gray-200">"Загрузки"</strong> (Downloads).
-            </p>
-            <div className="bg-gray-950 rounded-lg p-4 font-mono text-xs space-y-2">
-              <div>
-                <span className="text-gray-500">🪟 Windows:</span>{' '}
-                <span className="text-gray-300">C:\Users\ВашеИмя\Downloads\</span>
-              </div>
-              <div>
-                <span className="text-gray-500">🍎 Mac:</span>{' '}
-                <span className="text-gray-300">/Users/ВашеИмя/Downloads/</span>
-              </div>
-              <div>
-                <span className="text-gray-500">🐧 Linux:</span>{' '}
-                <span className="text-gray-300">/home/ВашеИмя/Downloads/</span>
-              </div>
-            </div>
-            <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 text-yellow-200">
-              💡 <strong>Совет:</strong> После скачивания создайте папку <code>video2shorts</code> на Рабочем столе и переместите туда все файлы.
-            </div>
+          <p className="text-gray-300 text-sm mb-3">
+            Файлы скачаются в папку <strong className="text-white">"Загрузки"</strong> (Downloads) на вашем ноутбуке.
+          </p>
+          <div className="bg-gray-950 rounded-lg p-3 font-mono text-xs space-y-1">
+            <div><span className="text-gray-500">Windows:</span> <span className="text-gray-300">C:\Users\ВашеИмя\Downloads\</span></div>
+            <div><span className="text-gray-500">Mac:</span> <span className="text-gray-300">/Users/ВашеИмя/Downloads/</span></div>
+            <div><span className="text-gray-500">Linux:</span> <span className="text-gray-300">/home/ВашеИмя/Downloads/</span></div>
           </div>
         </div>
 
-        {/* Быстрый старт */}
-        <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border border-green-500/20 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            🚀 Что делать после скачивания
+        {/* Что делать дальше */}
+        <div className="mt-6 bg-green-900/20 border border-green-500/30 rounded-2xl p-5">
+          <h2 className="font-bold text-lg mb-3 flex items-center gap-2">
+            ✅ Что делать после скачивания
           </h2>
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">1</div>
-              <div className="text-sm text-gray-300">
-                Скачайте все файлы и положите в одну папку
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">2</div>
-              <div className="text-sm text-gray-300">
-                Установите Python с <a href="https://python.org" target="_blank" className="text-violet-400 underline">python.org</a> (отметьте "Add to PATH") и FFmpeg
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">3</div>
-              <div className="text-sm text-gray-300">
-                Откройте терминал в папке с файлами и запустите установку:
-                <div className="mt-2 bg-gray-950 rounded p-2 font-mono text-xs">
-                  <div className="text-green-400">install.bat</div>
-                  <div className="text-gray-500 mt-1"># или для Mac/Linux: chmod +x install.sh && ./install.sh</div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">4</div>
-              <div className="text-sm text-gray-300">
-                Запустите обработку видео:
-                <div className="mt-2 bg-gray-950 rounded p-2 font-mono text-xs">
-                  <div className="text-green-400">python main.py --input ваше_видео.mp4 --output ./clips/</div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">5</div>
-              <div className="text-sm text-gray-300">
-                Готово! Вертикальные клипы появятся в папке <code className="text-violet-300">clips/</code> 🎉
-              </div>
-            </div>
-          </div>
+          <ol className="space-y-2 text-sm text-gray-300">
+            <li className="flex gap-2">
+              <span className="text-green-400 font-bold">1.</span>
+              <span>Найдите скачанные файлы в папке <strong className="text-white">"Загрузки"</strong></span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-green-400 font-bold">2.</span>
+              <span>Создайте папку <code className="bg-gray-950 px-2 py-0.5 rounded text-violet-300">video2shorts</code> на Рабочем столе</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-green-400 font-bold">3.</span>
+              <span>Переместите все 12 файлов в эту папку</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-green-400 font-bold">4.</span>
+              <span>Установите Python с <a href="https://python.org" target="_blank" className="text-violet-400 underline">python.org</a> и FFmpeg</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-green-400 font-bold">5.</span>
+              <span>Откройте терминал в папке и запустите <code className="bg-gray-950 px-2 py-0.5 rounded text-green-300">install.bat</code></span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-green-400 font-bold">6.</span>
+              <span>Запустите: <code className="bg-gray-950 px-2 py-0.5 rounded text-green-300">python main.py --input видео.mp4</code></span>
+            </li>
+          </ol>
         </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-500 py-6 border-t border-gray-800">
-          <p>Все 12 файлов проекта доступны для скачивания выше</p>
-          <p className="mt-1">Нажмите "Скачать всё" — и они попадут в вашу папку "Загрузки"</p>
+        {/* Подсказка */}
+        <div className="mt-6 text-center text-sm text-gray-500">
+          💡 Эта страница — и есть тот "сайт", где лежат файлы. Просто нажимайте кнопки "Скачать".
         </div>
       </div>
     </div>
