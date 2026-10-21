@@ -1,0 +1,58 @@
+# Video2Shorts — Конфигурация пайплайна
+# ==========================================
+
+# Транскрибация аудио
+transcription:
+  model: "medium"              # tiny, base, small, medium, large-v3
+  language: "ru"               # Язык распознавания
+  device: "auto"               # auto, cuda, cpu
+  compute_type: "float16"      # float16 (GPU), int8 (CPU), float32
+  max_chunk_minutes: 5         # Разбиение длинных видео на части (минуты)
+
+# LLM для поиска хайлайтов
+llm:
+  ollama_url: "http://localhost:11434"
+  model: "qwen2.5:14b"        # qwen2.5:14b, llama3:8b, mistral:7b
+  temperature: 0.3
+  max_tokens: 2000
+
+# Параметры поиска хайлайтов
+highlights:
+  count: 5                     # Количество искомых фрагментов
+  min_duration: 30             # Минимальная длина (секунды)
+  max_duration: 60             # Максимальная длина (секунды)
+
+# Трекинг лица/спикера
+tracking:
+  model: "yolov8n.pt"          # yolov8n.pt, yolov8s.pt, yolov8m.pt
+  smoothing: "kalman"          # kalman, moving_average
+  smoothing_window: 15         # Окно сглаживания (кадры)
+  confidence_threshold: 0.5    # Порог уверенности детекции
+
+# Рендеринг
+render:
+  width: 1080                  # Ширина выходного видео
+  height: 1920                 # Высота выходного видео (9:16)
+  fps: 30                      # Частота кадров
+  codec: "libx264"             # Видеокодек
+  crf: 18                      # Качество (18-28, меньше = лучше)
+  preset: "medium"             # Скорость кодирования
+  audio_bitrate: "192k"        # Битрейт аудио
+  subtitle_style:
+    font: "Arial"
+    fontsize: 42
+    fontcolor: "white"
+    borderstyle: 1
+    outline: 3
+    shadow: 2
+    outlinecolor: "black"
+    shadowcolor: "black"
+    margin_v: 150
+    alignment: 2
+    bold: 1
+
+# Кэширование
+cache_dir: "./cache/"
+
+# Выходная директория
+output_dir: "./clips/"
